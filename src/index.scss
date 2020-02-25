@@ -1,13 +1,44 @@
+@import '~bootstrap/scss/bootstrap.scss';
+
+$primary: rgba(0, 0, 0, 1);
+$secondary: rgba(23, 162, 184, 1);
+$info: rgba(114, 188, 250, .7);
+$light-blue: rgba(173, 216, 230, .28);
+$success: rgba(0, 255, 150, 1);
+$warning: rgba(255, 0, 0, 1);
+
+
 body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  font-size: 3rem;
+  margin: 20rem;
+}
+
+.card {
+  margin: 0 auto;
+  min-width: 1000px;
+}
+
+.card-header:first-child {
+  background: $light-blue;
+  border: 1px solid $info;
+  color: $secondary;
+  font-weight: bold;
+}
+
+.col-md-4 {
+  padding: 0;
+}
+
+.container {
+  flex-direction: row;
+}
+
+.form {
+  margin-top: 10vh;
+  padding: 0;
 }
 
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
 }
