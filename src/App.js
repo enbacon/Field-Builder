@@ -1,12 +1,12 @@
-import React from 'react';
+import React from 'react'
+import Builder from './Builder'
 
-
-function App() {
+function App () {
   return (
     <div className="App">
-
+      <Builder />
     </div>
-  );
+  )
 }
 
-export default App;
+export default App
