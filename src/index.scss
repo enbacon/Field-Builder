@@ -14,29 +14,50 @@ body {
   margin: 20rem;
 }
 
-.card {
-  margin: 0 auto;
-  min-width: 1000px;
-}
-
-.card-header:first-child {
-  background: $light-blue;
-  border: 1px solid $info;
+h2 {
+  background-color: $light-blue;
+  border-bottom: 1px solid $secondary;
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
   color: $secondary;
-  font-weight: bold;
-}
-
-.col-md-4 {
-  padding: 0;
+  padding: 15px 25px;
 }
 
 .container {
-  flex-direction: row;
+  display: flex;
+  height: 800px;
+  justify-content: space-around;
 }
 
 .form {
-  margin-top: 10vh;
-  padding: 0;
+  margin-right: 75px;
+  padding: 20px 50px 50px;
+}
+
+.form-field {
+  border: 2px solid $secondary;
+  border-radius: 20px;
+  height: auto;
+  margin: auto;
+  position: relative;
+  width: 650px;
+}
+
+.label {
+  font-weight: 500;
+  margin-top: 5px;
+}
+
+.reset {
+  margin: 5px 0 0 8px;
+}
+
+.save {
+  margin: 5px 10px 8px 0;
+}
+
+.text-area {
+  min-height: 8.5rem;
 }
 
 code {
