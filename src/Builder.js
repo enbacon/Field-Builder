@@ -9,26 +9,25 @@ const Builder = () => {
   const [field, setField] = useState({
     label: '',
     default: '',
-    choices:
-      'Carrot Cake, Ice Cream Cake, Funfetti Cake',
-    displayAlpha: true,
+    choices: '',
+    displayAlpha: false,
     multiSelect: false,
-    required: false
+    required: false,
+    choicesError: ''
   })
 
-  let formattedChoices
-  // const choicesLogic = () => {
-  //   // convert choices string to an array of unique elements
-  //   formattedChoices = [...new Set(field.choices.split('\n'))]
-  //   console.log('this is formatted choices', formattedChoices)
-  //   console.log(2)
-  // }
+  let choiceArray = []
+  const choicesLogic = () => {
+    // Create array with unique entries/choices
+    // Add default value
+    // Eliminate blank lines
+    choiceArray = [...new Set(field.choices.split('\n')).add(field.default)].filter(element => (element !== ''))
+    console.log('this is choiceArray', choiceArray)
+  }
 
   const handleChange = event => {
     event.persist()
-    console.log('formattedChoices in handleChange', formattedChoices)
     setField(field => ({ ...field, [event.target.name]: event.target.value }))
-    console.log(1)
   }
 
   const handleCheck = event => {
@@ -36,10 +35,30 @@ const Builder = () => {
     setField(field => ({ ...field, [event.target.name]: !field[event.target.name] }))
   }
 
+  const validate = () => {
+    let choicesError = ''
+    // Change from 5 to 50 before submission
+    // Currently using 5 for purposes of testing
+    if (choiceArray.length > 5) {
+      choicesError = 'Sorry, too many choices entered. Maximum of 50 including the default value. Please delete a choice before saving.'
+    }
+    if (choicesError) {
+      setField({ ...field, choicesError })
+      return false
+    }
+    return true
+  }
+
   const handleSubmit = event => {
     event.preventDefault()
-    console.log('this is fieldSaved in handleSubmit', field)
-    console.log(3)
+    choicesLogic()
+    // Check validity, if form valid, submit and reset valid state
+    const isValid = validate()
+    if (isValid) {
+      // Clear choicesError state upon successful submission
+      setField({ ...field, choicesError: '' })
+    }
+    console.log('submit field values', field)
   }
 
   return (
@@ -93,10 +112,11 @@ const Builder = () => {
                   onChange={handleChange}
                   value={field.choices}
                   md={7} />
+                <div style={{ fontSize: 14, color: 'red' }}>{field.choicesError}</div>
               </Col>
             </Form.Group>
 
-            <Form.Group as={Row} controlId="alphabetical">
+            <Form.Group as={Row}>
               <Col md={4}>
               </Col>
               <Col>
@@ -109,7 +129,7 @@ const Builder = () => {
               </Col>
             </Form.Group>
 
-            <Form.Group as={Row} controlId="multiSelect">
+            <Form.Group as={Row}>
               <Col md={4}>
               </Col>
               <Col>
@@ -149,7 +169,6 @@ const Builder = () => {
           </Form>
         </div>
       </Container>
-
     </div>
   )
 }
