@@ -7,6 +7,8 @@ import Button from 'react-bootstrap/Button'
 import axios from 'axios'
 
 const Builder = () => {
+  const MAX_CHOICES = 50
+
   const [field, setField] = useState({
     label: '',
     default: '',
@@ -65,8 +67,8 @@ const Builder = () => {
       errors.duplicatesError = `Duplicate choices are not allowed. Please remove the following duplicates: ${duplicates.join(', ')}`
     }
 
-    if (choicesArray.length > 50) {
-      errors.choicesError = 'Maximum of 50 choices (including the default value) allowed. Please delete some options before saving.'
+    if (choicesArray.length > MAX_CHOICES) {
+      errors.choicesError = `You have entered ${choicesArray.length} choices (maximum of ${MAX_CHOICES}). Please delete ${choicesArray.length - MAX_CHOICES} before saving.`
     }
     return errors
   }
