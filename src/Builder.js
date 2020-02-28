@@ -35,7 +35,6 @@ const Builder = () => {
   const handleChange = event => {
     event.persist()
     setField(field => ({ ...field, [event.target.name]: event.target.value }))
-    console.log('change field', field)
   }
 
   // Check box handling
@@ -46,7 +45,6 @@ const Builder = () => {
 
   // Find duplicate entries
   const findDuplicates = (choicesArray) => {
-    console.log('choicesArray in findDuplicates', choicesArray)
     const duplicates = choicesArray.reduce(function (acc, curr, index, srcArr) {
       if (srcArr.indexOf(curr) !== index && acc.indexOf(curr) < 0) acc.push(curr)
       return acc
@@ -76,14 +74,21 @@ const Builder = () => {
     const choicesString = choicesArray.join('\n')
     const errors = validate(choicesArray)
     setField({ ...field, choices: choicesString, ...errors })
-    console.log('this is errors object', errors)
-    if (Object.entries(errors).length === 0) {
+    if (Object.values(errors).every(x => x === '')) {
       submit()
     }
   }
 
   const submit = () => {
-    console.log('submit field values', field)
+    const data = {
+      label: field.label,
+      default: field.default,
+      choices: normalizeChoices(field.choices, field.default),
+      displayAlpha: field.displayAlpha,
+      multiSelect: field.multiSelect,
+      required: field.required
+    }
+    console.log('This is data', data)
   }
 
   const resetState = () => {
@@ -102,7 +107,6 @@ const Builder = () => {
   const handleReset = event => {
     event.preventDefault()
     resetState()
-    console.log('this is reset field', field)
   }
 
   return (
