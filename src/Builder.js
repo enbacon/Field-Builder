@@ -4,6 +4,7 @@ import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col'
 import Form from 'react-bootstrap/Form'
 import Button from 'react-bootstrap/Button'
+import axios from 'axios'
 
 const Builder = () => {
   const [field, setField] = useState({
@@ -12,21 +13,24 @@ const Builder = () => {
     choices: '',
     displayAlpha: false,
     multiSelect: false,
-    required: false,
+    required: false
+  })
+  const [notifications, setNotifications] = useState({
     duplicatesError: '',
     choicesError: ''
   })
+  const [created, setCreated] = useState('')
 
   // Turn choices string into an array
   // Add defaultChoice value if not already included
   const normalizeChoices = (choices, defaultChoice) => {
     let choicesArray = choices.split('\n')
+
     if (!choicesArray.includes(defaultChoice)) {
       choicesArray.push(defaultChoice)
     }
-    // Remove whitespace (possible accidental space) at end of lines
+
     choicesArray = choicesArray.map(x => x.trim())
-    // Remove empty lines
     choicesArray = choicesArray.filter(element => element !== '')
     return choicesArray
   }
@@ -55,14 +59,13 @@ const Builder = () => {
   const validate = (choicesArray) => {
     // When validate is called, clear errors to avoid false notifications
     const errors = { duplicatesError: '', choicesError: '' }
-    // Check for duplicates. Notify user if any exist.
+
     const duplicates = findDuplicates(choicesArray)
     if (duplicates.length !== 0) {
       errors.duplicatesError = `Duplicate choices are not allowed. Please remove the following duplicates: ${duplicates.join(', ')}`
     }
-    // Change from 4 to 50 before submission
-    // Currently using 4 for purposes of testing
-    if (choicesArray.length > 4) {
+
+    if (choicesArray.length > 50) {
       errors.choicesError = 'Maximum of 50 choices (including the default value) allowed. Please delete some options before saving.'
     }
     return errors
@@ -70,10 +73,14 @@ const Builder = () => {
 
   const handleSubmit = event => {
     event.preventDefault()
+
     const choicesArray = normalizeChoices(field.choices, field.default)
     const choicesString = choicesArray.join('\n')
     const errors = validate(choicesArray)
-    setField({ ...field, choices: choicesString, ...errors })
+
+    setField({ ...field, choices: choicesString })
+    setNotifications({ ...errors })
+    setCreated('')
     if (Object.values(errors).every(x => x === '')) {
       submit()
     }
@@ -88,7 +95,16 @@ const Builder = () => {
       multiSelect: field.multiSelect,
       required: field.required
     }
-    console.log('This is data', data)
+
+    axios({
+      method: 'POST',
+      url: 'http://www.mocky.io/v2/566061f21200008e3aabd919',
+      data: data
+    })
+      .then(() => setCreated('Congratulations! Form successfully built!'))
+      .catch(console.error)
+
+    console.log('Field data', data)
   }
 
   const resetState = () => {
@@ -98,10 +114,15 @@ const Builder = () => {
       choices: '',
       displayAlpha: false,
       multiSelect: false,
-      required: false,
+      required: false
+    })
+
+    setNotifications({
       duplicatesError: '',
       choicesError: ''
     })
+
+    setCreated('')
   }
 
   const handleReset = event => {
@@ -114,11 +135,13 @@ const Builder = () => {
       <Container className="container">
         <div className="form-field">
           <h2>Field Builder</h2>
+
           <Form className="form" onSubmit={handleSubmit}>
             <Form.Group as={Row} controlId="label">
               <Col md={4}>
                 <Form.Label className="label">Label</Form.Label>
               </Col>
+
               <Col>
                 <Form.Control
                   required
@@ -136,6 +159,7 @@ const Builder = () => {
               <Col md={4}>
                 <Form.Label className="label">Default Value</Form.Label>
               </Col>
+
               <Col>
                 <Form.Control
                   type="text"
@@ -151,6 +175,7 @@ const Builder = () => {
               <Col md={4}>
                 <Form.Label className="label">Choices</Form.Label>
               </Col>
+
               <Col>
                 <Form.Control
                   as="textarea"
@@ -160,14 +185,21 @@ const Builder = () => {
                   onChange={handleChange}
                   value={field.choices}
                   md={7} />
-                <div style={{ fontSize: 14, color: 'red', marginLeft: '2px' }}>{field.duplicatesError}</div>
-                <div style={{ fontSize: 14, color: 'red' }}>{field.choicesError}</div>
+
+                <div style={{ fontSize: 14, color: 'red', marginLeft: '2px' }}>
+                  {notifications.duplicatesError}
+                </div>
+
+                <div style={{ fontSize: 14, color: 'red' }}>
+                  {notifications.choicesError}
+                </div>
               </Col>
             </Form.Group>
 
             <Form.Group as={Row}>
               <Col md={4}>
               </Col>
+
               <Col>
                 <Form.Check
                   type="checkbox"
@@ -181,6 +213,7 @@ const Builder = () => {
             <Form.Group as={Row}>
               <Col md={4}>
               </Col>
+
               <Col>
                 <Form.Check
                   type="checkbox"
@@ -194,6 +227,7 @@ const Builder = () => {
             <Form.Group as={Row} controlId="required">
               <Col md={4}>
               </Col>
+
               <Col>
                 <Form.Check
                   type="checkbox"
@@ -208,13 +242,31 @@ const Builder = () => {
             <Form.Group as={Row}>
               <Col md={4}>
               </Col>
+
               <Col md={4}>
-                <Button className="save" variant="success" type="submit">Save Changes</Button>
+                <Button
+                  className="save"
+                  variant="success"
+                  type="submit">
+                  Save Changes
+                </Button>
               </Col>
+
               <Col md={4}>
-                <Button className="reset" variant="outline-danger" type="button" onClick={handleReset}>Reset Form</Button>
+                <Button
+                  className="reset"
+                  variant="outline-danger"
+                  type="button"
+                  onClick={handleReset}>
+                  Reset Form
+                </Button>
               </Col>
+
             </Form.Group>
+            <div style={{ fontSize: 18, color: 'green' }}>
+              {created}
+            </div>
+
           </Form>
         </div>
       </Container>
