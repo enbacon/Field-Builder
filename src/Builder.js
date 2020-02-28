@@ -13,52 +13,96 @@ const Builder = () => {
     displayAlpha: false,
     multiSelect: false,
     required: false,
+    duplicatesError: '',
     choicesError: ''
   })
 
-  let choiceArray = []
-  const choicesLogic = () => {
-    // Create array with unique entries/choices
-    // Add default value
-    // Eliminate blank lines
-    choiceArray = [...new Set(field.choices.split('\n')).add(field.default)].filter(element => (element !== ''))
-    console.log('this is choiceArray', choiceArray)
+  // Turn choices string into an array
+  // Add defaultChoice value if not already included
+  const normalizeChoices = (choices, defaultChoice) => {
+    let choicesArray = choices.split('\n')
+    if (!choicesArray.includes(defaultChoice)) {
+      choicesArray.push(defaultChoice)
+    }
+    // Remove whitespace (possible accidental space) at end of lines
+    choicesArray = choicesArray.map(x => x.trim())
+    // Remove empty lines
+    choicesArray = choicesArray.filter(element => element !== '')
+    return choicesArray
   }
 
+  // Updates field state to reflect changes in text areas
   const handleChange = event => {
     event.persist()
     setField(field => ({ ...field, [event.target.name]: event.target.value }))
+    console.log('change field', field)
   }
 
+  // Check box handling
   const handleCheck = event => {
     event.persist()
     setField(field => ({ ...field, [event.target.name]: !field[event.target.name] }))
   }
 
-  const validate = () => {
-    let choicesError = ''
-    // Change from 5 to 50 before submission
-    // Currently using 5 for purposes of testing
-    if (choiceArray.length > 5) {
-      choicesError = 'Sorry, too many choices entered. Maximum of 50 including the default value. Please delete a choice before saving.'
+  // Find duplicate entries
+  const findDuplicates = (choicesArray) => {
+    console.log('choicesArray in findDuplicates', choicesArray)
+    const duplicates = choicesArray.reduce(function (acc, curr, index, srcArr) {
+      if (srcArr.indexOf(curr) !== index && acc.indexOf(curr) < 0) acc.push(curr)
+      return acc
+    }, [])
+    return duplicates
+  }
+
+  const validate = (choicesArray) => {
+    // When validate is called, clear errors to avoid false notifications
+    const errors = { duplicatesError: '', choicesError: '' }
+    // Check for duplicates. Notify user if any exist.
+    const duplicates = findDuplicates(choicesArray)
+    if (duplicates.length !== 0) {
+      errors.duplicatesError = `Duplicate choices are not allowed. Please remove the following duplicates: ${duplicates.join(', ')}`
     }
-    if (choicesError) {
-      setField({ ...field, choicesError })
-      return false
+    // Change from 4 to 50 before submission
+    // Currently using 4 for purposes of testing
+    if (choicesArray.length > 4) {
+      errors.choicesError = 'Maximum of 50 choices (including the default value) allowed. Please delete some options before saving.'
     }
-    return true
+    return errors
   }
 
   const handleSubmit = event => {
     event.preventDefault()
-    choicesLogic()
-    // Check validity, if form valid, submit and reset valid state
-    const isValid = validate()
-    if (isValid) {
-      // Clear choicesError state upon successful submission
-      setField({ ...field, choicesError: '' })
+    const choicesArray = normalizeChoices(field.choices, field.default)
+    const choicesString = choicesArray.join('\n')
+    const errors = validate(choicesArray)
+    setField({ ...field, choices: choicesString, ...errors })
+    console.log('this is errors object', errors)
+    if (Object.entries(errors).length === 0) {
+      submit()
     }
+  }
+
+  const submit = () => {
     console.log('submit field values', field)
+  }
+
+  const resetState = () => {
+    setField({
+      label: '',
+      default: '',
+      choices: '',
+      displayAlpha: false,
+      multiSelect: false,
+      required: false,
+      duplicatesError: '',
+      choicesError: ''
+    })
+  }
+
+  const handleReset = event => {
+    event.preventDefault()
+    resetState()
+    console.log('this is reset field', field)
   }
 
   return (
@@ -112,6 +156,7 @@ const Builder = () => {
                   onChange={handleChange}
                   value={field.choices}
                   md={7} />
+                <div style={{ fontSize: 14, color: 'red', marginLeft: '2px' }}>{field.duplicatesError}</div>
                 <div style={{ fontSize: 14, color: 'red' }}>{field.choicesError}</div>
               </Col>
             </Form.Group>
@@ -163,7 +208,7 @@ const Builder = () => {
                 <Button className="save" variant="success" type="submit">Save Changes</Button>
               </Col>
               <Col md={4}>
-                <Button className="reset" variant="outline-danger" type="submit">Reset Form</Button>
+                <Button className="reset" variant="outline-danger" type="button" onClick={handleReset}>Reset Form</Button>
               </Col>
             </Form.Group>
           </Form>
