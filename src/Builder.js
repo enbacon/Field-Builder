@@ -25,11 +25,15 @@ const Builder = () => {
 
   // Turn choices string into an array
   // Add defaultChoice value if not already included
-  const normalizeChoices = (choices, defaultChoice) => {
+  const normalizeChoices = (choices, defaultChoice, displayAlpha) => {
     let choicesArray = choices.split('\n')
 
     if (!choicesArray.includes(defaultChoice)) {
-      choicesArray.push(defaultChoice)
+      choicesArray.unshift(defaultChoice)
+    }
+
+    if (displayAlpha) {
+      choicesArray.sort()
     }
 
     choicesArray = choicesArray.map(x => x.trim())
@@ -76,7 +80,7 @@ const Builder = () => {
   const handleSubmit = event => {
     event.preventDefault()
 
-    const choicesArray = normalizeChoices(field.choices, field.default)
+    const choicesArray = normalizeChoices(field.choices, field.default, field.displayAlpha)
     const choicesString = choicesArray.join('\n')
     const errors = validate(choicesArray)
 
@@ -92,7 +96,7 @@ const Builder = () => {
     const data = {
       label: field.label,
       default: field.default,
-      choices: normalizeChoices(field.choices, field.default),
+      choices: normalizeChoices(field.choices, field.default, field.displayAlpha),
       displayAlpha: field.displayAlpha,
       multiSelect: field.multiSelect,
       required: field.required
