@@ -7,14 +7,17 @@ $light-blue: rgba(173, 216, 230, .28);
 $success: rgba(0, 255, 150, 1);
 $warning: rgba(255, 0, 0, 1);
 
-
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
   font-size: 3rem;
   margin: 20rem;
 }
 
-h2 {
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
+}
+
+h1 {
   background-color: $light-blue;
   border-bottom: 1px solid $secondary;
   border-top-left-radius: 20px;
@@ -60,8 +63,8 @@ h2 {
   min-height: 8.5rem;
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
+#form-name {
+  font-size: 1.5rem;
 }
 
 @media only screen and (max-width: 400px) {

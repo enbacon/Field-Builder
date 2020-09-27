@@ -7,7 +7,7 @@ import Button from 'react-bootstrap/Button'
 import axios from 'axios'
 
 const Builder = () => {
-  const MAX_CHOICES = 50
+  const MAX_CHOICES = 5
 
   const [field, setField] = useState({
     label: '',
@@ -140,7 +140,7 @@ const Builder = () => {
     <div>
       <Container className="container">
         <div className="form-field">
-          <h2>Field Builder</h2>
+          <h1 id="form-name">Field Builder</h1>
 
           <Form className="form" onSubmit={handleSubmit}>
             <Form.Group as={Row} controlId="label">
