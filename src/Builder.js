@@ -28,7 +28,9 @@ const Builder = () => {
   const normalizeChoices = (choices, defaultChoice, displayAlpha) => {
     let choicesArray = choices.split('\n')
 
-    if (!choicesArray.includes(defaultChoice)) {
+    const choicesArrayLowerCase = choicesArray.map(choice => choice.toLowerCase())
+
+    if (!choicesArrayLowerCase.includes(defaultChoice.toLowerCase())) {
       choicesArray.unshift(defaultChoice)
     }
 
@@ -55,7 +57,9 @@ const Builder = () => {
 
   // Find duplicate entries
   const findDuplicates = (choicesArray) => {
-    const duplicates = choicesArray.reduce(function (acc, curr, index, srcArr) {
+    const choicesArrayLowerCase = choicesArray.map(choice => choice.toLowerCase())
+
+    const duplicates = choicesArrayLowerCase.reduce(function (acc, curr, index, srcArr) {
       if (srcArr.indexOf(curr) !== index && acc.indexOf(curr) < 0) acc.push(curr)
       return acc
     }, [])
@@ -107,7 +111,7 @@ const Builder = () => {
       url: 'http://www.mocky.io/v2/566061f21200008e3aabd919',
       data: data
     })
-      .then(() => setCreated('Congratulations! Form successfully built!'))
+      .then(() => setCreated('Congratulations! Field built successfully !'))
       .catch(console.error)
 
     console.log('Field data', data)
