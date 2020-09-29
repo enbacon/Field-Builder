@@ -5,9 +5,10 @@ import Col from 'react-bootstrap/Col'
 import Form from 'react-bootstrap/Form'
 import Button from 'react-bootstrap/Button'
 import axios from 'axios'
-import { validate } from './validations.js'
 
 const Builder = () => {
+  const MAX_CHOICES = 5
+
   const [field, setField] = useState({
     label: '',
     default: '',
@@ -27,9 +28,7 @@ const Builder = () => {
   const normalizeChoices = (choices, defaultChoice, displayAlpha) => {
     let choicesArray = choices.split('\n')
 
-    const choicesArrayLowerCase = choicesArray.map(choice => choice.toLowerCase())
-
-    if (!choicesArrayLowerCase.includes(defaultChoice.toLowerCase())) {
+    if (!choicesArray.includes(defaultChoice)) {
       choicesArray.unshift(defaultChoice)
     }
 
@@ -52,6 +51,30 @@ const Builder = () => {
   const handleCheck = event => {
     event.persist()
     setField(field => ({ ...field, [event.target.name]: !field[event.target.name] }))
+  }
+
+  // Find duplicate entries
+  const findDuplicates = (choicesArray) => {
+    const duplicates = choicesArray.reduce(function (acc, curr, index, srcArr) {
+      if (srcArr.indexOf(curr) !== index && acc.indexOf(curr) < 0) acc.push(curr)
+      return acc
+    }, [])
+    return duplicates
+  }
+
+  const validate = (choicesArray) => {
+    // When validate is called, clear errors to avoid false notifications
+    const errors = { duplicatesError: '', choicesError: '' }
+
+    const duplicates = findDuplicates(choicesArray)
+    if (duplicates.length !== 0) {
+      errors.duplicatesError = `Duplicate choices are not allowed. Please remove the following duplicates: ${duplicates.join(', ')}`
+    }
+
+    if (choicesArray.length > MAX_CHOICES) {
+      errors.choicesError = `You have entered ${choicesArray.length} choices (maximum of ${MAX_CHOICES}). Please delete ${choicesArray.length - MAX_CHOICES} before saving.`
+    }
+    return errors
   }
 
   const handleSubmit = event => {
@@ -84,7 +107,7 @@ const Builder = () => {
       url: 'http://www.mocky.io/v2/566061f21200008e3aabd919',
       data: data
     })
-      .then(() => setCreated('Congratulations! Field built successfully !'))
+      .then(() => setCreated('Congratulations! Form successfully built!'))
       .catch(console.error)
 
     console.log('Field data', data)
