@@ -1,7 +1,7 @@
 const MAX_CHOICES = 5
 
-// Export function to allow it to be reusable
-// Regular function declaration
+// Export function to allow it to be used in Builder.js
+// Making this custom validation reusable
 
 export function validate (choicesArray) {
   // When validate is called, clear errors to avoid false notifications
