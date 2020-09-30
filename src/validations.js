@@ -1,4 +1,5 @@
 const MAX_CHOICES = 5
+// const MAX_CHARACTER_LENGTH = 10
 
 // Export function to allow it to be used in Builder.js
 // Making this custom validation reusable
@@ -19,7 +20,7 @@ export function validate (choicesArray) {
 }
 
 // Find duplicate entries
-export function findDuplicates (choicesArray) {
+function findDuplicates (choicesArray) {
   const choicesArrayLowerCase = choicesArray.map(choice => choice.toLowerCase())
 
   const duplicates = choicesArrayLowerCase.reduce(function (acc, curr, index, srcArr) {
@@ -30,3 +31,4 @@ export function findDuplicates (choicesArray) {
 }
 
 // Check choices character length
+// function characterLimit (choicesArray)

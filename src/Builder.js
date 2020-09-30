@@ -8,6 +8,7 @@ import axios from 'axios'
 import { validate } from './validations.js'
 
 const Builder = () => {
+  const MAX_CHARACTER_LENGTH = 5
   const [field, setField] = useState({
     label: '',
     default: '',
@@ -15,6 +16,9 @@ const Builder = () => {
     displayAlpha: false,
     multiSelect: false,
     required: false
+  })
+  const [characterNotification, setCharacterNotification] = useState({
+    charactersRemaining: `${MAX_CHARACTER_LENGTH} characters left`
   })
   const [notifications, setNotifications] = useState({
     duplicatesError: '',
@@ -46,6 +50,15 @@ const Builder = () => {
   const handleChange = event => {
     event.persist()
     setField(field => ({ ...field, [event.target.name]: event.target.value }))
+
+    // Characters remaining
+    if (event.target.name === 'default' && event.target.value.length >= 0) {
+      const choiceLength = event.target.value.length
+      characterNotification.charactersRemaining = `${MAX_CHARACTER_LENGTH - choiceLength} characters left`
+      console.log((MAX_CHARACTER_LENGTH - choiceLength) + ' characters left')
+    }
+
+    // console.log(`your entry is too long`)
   }
 
   // Check box handling
@@ -100,6 +113,10 @@ const Builder = () => {
       required: false
     })
 
+    setCharacterNotification({
+      charactersRemaining: MAX_CHARACTER_LENGTH + ' characters left'
+    })
+
     setNotifications({
       duplicatesError: '',
       choicesError: ''
@@ -131,6 +148,7 @@ const Builder = () => {
                   type="text"
                   name="label"
                   placeholder="Cake Flavors"
+                  autoComplete="off"
                   onChange={handleChange}
                   value={field.label}
                   md={7}
@@ -148,9 +166,15 @@ const Builder = () => {
                   type="text"
                   name="default"
                   placeholder="Red Velvet"
+                  autoComplete="off"
+                  maxLength={MAX_CHARACTER_LENGTH}
                   onChange={handleChange}
                   value={field.default}
                   md={7} />
+
+                <div style={{ fontSize: 14, color: 'black' }}>
+                  {characterNotification.charactersRemaining}
+                </div>
               </Col>
             </Form.Group>
 
@@ -165,6 +189,7 @@ const Builder = () => {
                   className="text-area"
                   name="choices"
                   placeholder="Add Choices"
+                  autoComplete="off"
                   onChange={handleChange}
                   value={field.choices}
                   md={7} />
