@@ -1,5 +1,5 @@
 const MAX_CHOICES = 5
-// const MAX_CHARACTER_LENGTH = 10
+// const MAX_CHARACTER_LIMIT = 10
 
 // Export function to allow it to be used in Builder.js
 // Making this custom validation reusable

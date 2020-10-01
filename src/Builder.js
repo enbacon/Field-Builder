@@ -8,7 +8,7 @@ import axios from 'axios'
 import { validate } from './validations.js'
 
 const Builder = () => {
-  const MAX_CHARACTER_LENGTH = 5
+  const MAX_CHARACTER_LIMIT = 10
   const [field, setField] = useState({
     label: '',
     default: '',
@@ -18,7 +18,7 @@ const Builder = () => {
     required: false
   })
   const [characterNotification, setCharacterNotification] = useState({
-    charactersRemaining: `${MAX_CHARACTER_LENGTH} characters left`
+    charactersRemaining: `${MAX_CHARACTER_LIMIT} character maximum`
   })
   const [notifications, setNotifications] = useState({
     duplicatesError: '',
@@ -52,13 +52,18 @@ const Builder = () => {
     setField(field => ({ ...field, [event.target.name]: event.target.value }))
 
     // Characters remaining
-    if (event.target.name === 'default' && event.target.value.length >= 0) {
-      const choiceLength = event.target.value.length
-      characterNotification.charactersRemaining = `${MAX_CHARACTER_LENGTH - choiceLength} characters left`
-      console.log((MAX_CHARACTER_LENGTH - choiceLength) + ' characters left')
-    }
+    const choiceLength = event.target.value.length
 
-    // console.log(`your entry is too long`)
+    if (event.target.name === 'default' && !event.target.value.length) {
+      characterNotification.charactersRemaining = `${MAX_CHARACTER_LIMIT} character maximum`
+    } else {
+      if (event.target.name === 'default') {
+        characterNotification.charactersRemaining = `${MAX_CHARACTER_LIMIT - choiceLength} characters left`
+        console.log('this is event.target.name', event.target.name)
+        console.log('this is field', field)
+        console.log(`${MAX_CHARACTER_LIMIT - choiceLength} characters left`)
+      }
+    }
   }
 
   // Check box handling
@@ -114,7 +119,7 @@ const Builder = () => {
     })
 
     setCharacterNotification({
-      charactersRemaining: MAX_CHARACTER_LENGTH + ' characters left'
+      charactersRemaining: `${MAX_CHARACTER_LIMIT} character maximum`
     })
 
     setNotifications({
@@ -167,7 +172,7 @@ const Builder = () => {
                   name="default"
                   placeholder="Red Velvet"
                   autoComplete="off"
-                  maxLength={MAX_CHARACTER_LENGTH}
+                  maxLength={MAX_CHARACTER_LIMIT}
                   onChange={handleChange}
                   value={field.default}
                   md={7} />
