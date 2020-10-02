@@ -14,7 +14,9 @@ export function validate (choicesArray) {
   }
 
   if (choicesArray.length > MAX_CHOICES) {
-    errors.choicesError = `You have entered ${choicesArray.length} choices (maximum of ${MAX_CHOICES}). Please delete ${choicesArray.length - MAX_CHOICES} before saving.`
+    errors.choicesError = `You have entered ${choicesArray.length} choices (maximum of ${MAX_CHOICES} allowed). Please delete ${choicesArray.length - MAX_CHOICES} before saving. Note: default choice should not be deleted.`
+    // indexOf default choice
+    // if -1 additional notification, default choice may not be deleted
   }
   return errors
 }
@@ -30,5 +32,8 @@ function findDuplicates (choicesArray) {
   return duplicates
 }
 
-// Check choices character length
+// Validation for default choice length will be called in handle changes
+
+// Check choices character length for choices textarea
+// call this function on submit
 // function characterLimit (choicesArray)
