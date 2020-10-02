@@ -18,7 +18,8 @@ const Builder = () => {
     required: false
   })
   const [characterNotification, setCharacterNotification] = useState({
-    charactersRemaining: `${MAX_CHARACTER_LIMIT} character maximum`
+    defaultCharactersRemaining: `${MAX_CHARACTER_LIMIT} character maximum`,
+    choicesCharactersRemaining: `${MAX_CHARACTER_LIMIT} character maximum per choice`
   })
   const [notifications, setNotifications] = useState({
     duplicatesError: '',
@@ -54,14 +55,20 @@ const Builder = () => {
     // Characters remaining
     const choiceLength = event.target.value.length
 
+    // Default Choice Length Validation
     if (event.target.name === 'default' && !event.target.value.length) {
-      characterNotification.charactersRemaining = `${MAX_CHARACTER_LIMIT} character maximum`
+      characterNotification.defaultCharactersRemaining = `${MAX_CHARACTER_LIMIT} character maximum`
+    } else if (event.target.name === 'default' && (MAX_CHARACTER_LIMIT - choiceLength >= 0)) {
+      characterNotification.defaultCharactersRemaining = `${MAX_CHARACTER_LIMIT - choiceLength} characters left`
+      console.log('this is event.target.name', event.target.name)
+      console.log(`${MAX_CHARACTER_LIMIT - choiceLength} characters left`)
     } else {
-      if (event.target.name === 'default') {
-        characterNotification.charactersRemaining = `${MAX_CHARACTER_LIMIT - choiceLength} characters left`
-        console.log('this is event.target.name', event.target.name)
-        console.log('this is field', field)
-        console.log(`${MAX_CHARACTER_LIMIT - choiceLength} characters left`)
+      if (event.target.name === 'default' && (MAX_CHARACTER_LIMIT - choiceLength < 0)) {
+        if (Math.abs(MAX_CHARACTER_LIMIT - choiceLength) === 1) {
+          characterNotification.defaultCharactersRemaining = `${Math.abs(MAX_CHARACTER_LIMIT - choiceLength)} character past maximum`
+        } else {
+          characterNotification.defaultCharactersRemaining = `${Math.abs(MAX_CHARACTER_LIMIT - choiceLength)} characters past maximum`
+        }
       }
     }
   }
@@ -97,13 +104,19 @@ const Builder = () => {
       required: field.required
     }
 
+    // Start spinner code here
     axios({
       method: 'POST',
       url: 'http://www.mocky.io/v2/566061f21200008e3aabd919',
       data: data
     })
-      .then(() => setCreated('Congratulations! Field built successfully !'))
-      .catch(console.error)
+
+      .then(() => setCreated('Congratulations! Field built successfully!')
+        // and stop spinner
+      )
+      .catch(console.error
+        // and stop spinner
+      )
 
     console.log('Field data', data)
   }
@@ -119,7 +132,8 @@ const Builder = () => {
     })
 
     setCharacterNotification({
-      charactersRemaining: `${MAX_CHARACTER_LIMIT} character maximum`
+      defaultCharactersRemaining: `${MAX_CHARACTER_LIMIT} character maximum`,
+      choicesCharactersRemaining: `${MAX_CHARACTER_LIMIT} character maximum per choice`
     })
 
     setNotifications({
@@ -153,7 +167,6 @@ const Builder = () => {
                   type="text"
                   name="label"
                   placeholder="Cake Flavors"
-                  autoComplete="off"
                   onChange={handleChange}
                   value={field.label}
                   md={7}
@@ -163,7 +176,7 @@ const Builder = () => {
 
             <Form.Group as={Row} controlId="default" className="small-entry">
               <Col md={4}>
-                <Form.Label className="label">Default Value</Form.Label>
+                <Form.Label className="label">Default Choice</Form.Label>
               </Col>
 
               <Col>
@@ -171,14 +184,12 @@ const Builder = () => {
                   type="text"
                   name="default"
                   placeholder="Red Velvet"
-                  autoComplete="off"
-                  maxLength={MAX_CHARACTER_LIMIT}
                   onChange={handleChange}
                   value={field.default}
                   md={7} />
 
                 <div style={{ fontSize: 14, color: 'black' }}>
-                  {characterNotification.charactersRemaining}
+                  {characterNotification.defaultCharactersRemaining}
                 </div>
               </Col>
             </Form.Group>
@@ -194,10 +205,13 @@ const Builder = () => {
                   className="text-area"
                   name="choices"
                   placeholder="Add Choices"
-                  autoComplete="off"
                   onChange={handleChange}
                   value={field.choices}
                   md={7} />
+
+                <div style={{ fontSize: 14, color: 'black' }}>
+                  {characterNotification.choicesCharactersRemaining}
+                </div>
 
                 <div style={{ fontSize: 14, color: 'red', marginLeft: '2px' }}>
                   {notifications.duplicatesError}
