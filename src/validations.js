@@ -1,4 +1,4 @@
-const MAX_CHOICES = 50
+const MAX_CHOICES = 5
 
 // Export function to allow it to be used in Builder.js
 // Makes this custom validation reusable

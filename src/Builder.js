@@ -43,22 +43,23 @@ const Builder = () => {
 
   // Add defaultChoice value if not already included
   const addDefaultIfNeeded = (defaultChoice, choicesArray) => {
-    // Do not add default value if none exists
     if (!defaultChoice) {
       return choicesArray
     }
 
     const defaultLowerCase = defaultChoice.toLowerCase().trim()
+
+    choiceCharacterNotification(defaultLowerCase, MAX_CHARACTER_LIMIT)
+
     const choicesArrayLowerCase = choicesArray.map(choice => choice.toLowerCase())
 
     if (!choicesArrayLowerCase.includes(defaultLowerCase)) {
       choicesArray.unshift(defaultChoice.trim())
     }
-    characterNotification(defaultLowerCase, MAX_CHARACTER_LIMIT)
     return choicesArray
   }
 
-  const characterNotification = (defaultChoice, maxCharacterLength) => {
+  const choiceCharacterNotification = (defaultChoice, maxCharacterLength) => {
     const choiceLength = defaultChoice.length
     const characterDifference = maxCharacterLength - choiceLength
 
@@ -92,7 +93,7 @@ const Builder = () => {
 
     if (!isDefault) {
     } else {
-      characterNotification(defaultChoice, MAX_CHARACTER_LIMIT)
+      choiceCharacterNotification(defaultChoice, MAX_CHARACTER_LIMIT)
     }
   }
 
