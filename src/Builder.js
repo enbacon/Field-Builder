@@ -17,9 +17,9 @@ const Builder = () => {
     multiSelect: false,
     required: false
   })
-  const [characterNotification, setCharacterNotification] = useState({
-    defaultCharactersRemaining: `${MAX_CHARACTER_LIMIT} character maximum`,
-    choicesCharactersRemaining: `${MAX_CHARACTER_LIMIT} character maximum per choice`
+  const [onChangeNotifications, setOnChangeNotifications] = useState({
+    defaultCharacterMax: `${MAX_CHARACTER_LIMIT} character maximum`,
+    choicesCharacterMax: ''
   })
   const [notifications, setNotifications] = useState({
     duplicatesError: '',
@@ -35,7 +35,7 @@ const Builder = () => {
     const choicesArrayLowerCase = choicesArray.map(choice => choice.toLowerCase())
 
     if (!choicesArrayLowerCase.includes(defaultChoice.toLowerCase())) {
-      choicesArray.unshift(defaultChoice)
+      choicesArray.unshift(defaultChoice.trim())
     }
 
     if (displayAlpha) {
@@ -54,23 +54,32 @@ const Builder = () => {
 
     // Characters remaining
     const choiceLength = event.target.value.length
+    const isDefault = event.target.name === 'default'
+    const charactersRemaining = MAX_CHARACTER_LIMIT - choiceLength
+
+    if (!isDefault) {
+      return
+    }
 
     // Default Choice Length Validation
-    if (event.target.name === 'default' && !event.target.value.length) {
-      characterNotification.defaultCharactersRemaining = `${MAX_CHARACTER_LIMIT} character maximum`
-    } else if (event.target.name === 'default' && (MAX_CHARACTER_LIMIT - choiceLength >= 0)) {
-      characterNotification.defaultCharactersRemaining = `${MAX_CHARACTER_LIMIT - choiceLength} characters left`
-      console.log('this is event.target.name', event.target.name)
-      console.log(`${MAX_CHARACTER_LIMIT - choiceLength} characters left`)
-    } else {
-      if (event.target.name === 'default' && (MAX_CHARACTER_LIMIT - choiceLength < 0)) {
-        if (Math.abs(MAX_CHARACTER_LIMIT - choiceLength) === 1) {
-          characterNotification.defaultCharactersRemaining = `${Math.abs(MAX_CHARACTER_LIMIT - choiceLength)} character past maximum`
-        } else {
-          characterNotification.defaultCharactersRemaining = `${Math.abs(MAX_CHARACTER_LIMIT - choiceLength)} characters past maximum`
-        }
+    let notification
+    if (!choiceLength) {
+      notification = `${MAX_CHARACTER_LIMIT} character maximum`
+    } else if (charactersRemaining >= 0) {
+      if (charactersRemaining === 1) {
+        notification = `${charactersRemaining} character left`
+      } else {
+        notification = `${charactersRemaining} characters left`
+      }
+    } else if (charactersRemaining < 0) {
+      // add code to change color of the notification
+      if (Math.abs(charactersRemaining) === 1) {
+        notification = `${Math.abs(charactersRemaining)} character past maximum`
+      } else {
+        notification = `${Math.abs(charactersRemaining)} characters past maximum`
       }
     }
+    onChangeNotifications.defaultCharacterMax = notification
   }
 
   // Check box handling
@@ -104,19 +113,14 @@ const Builder = () => {
       required: field.required
     }
 
-    // Start spinner code here
     axios({
       method: 'POST',
       url: 'http://www.mocky.io/v2/566061f21200008e3aabd919',
       data: data
     })
 
-      .then(() => setCreated('Congratulations! Field built successfully!')
-        // and stop spinner
-      )
-      .catch(console.error
-        // and stop spinner
-      )
+      .then(() => setCreated('Congratulations! Field built successfully!'))
+      .catch(console.error)
 
     console.log('Field data', data)
   }
@@ -131,9 +135,9 @@ const Builder = () => {
       required: false
     })
 
-    setCharacterNotification({
-      defaultCharactersRemaining: `${MAX_CHARACTER_LIMIT} character maximum`,
-      choicesCharactersRemaining: `${MAX_CHARACTER_LIMIT} character maximum per choice`
+    setOnChangeNotifications({
+      defaultCharacterMax: `${MAX_CHARACTER_LIMIT} character maximum`,
+      choicesCharacterMax: ''
     })
 
     setNotifications({
@@ -184,12 +188,13 @@ const Builder = () => {
                   type="text"
                   name="default"
                   placeholder="Red Velvet"
+                  // maxLength= {MAX_CHARACTER_LIMIT}
                   onChange={handleChange}
                   value={field.default}
                   md={7} />
 
                 <div style={{ fontSize: 14, color: 'black' }}>
-                  {characterNotification.defaultCharactersRemaining}
+                  {onChangeNotifications.defaultCharacterMax}
                 </div>
               </Col>
             </Form.Group>
@@ -210,7 +215,7 @@ const Builder = () => {
                   md={7} />
 
                 <div style={{ fontSize: 14, color: 'black' }}>
-                  {characterNotification.choicesCharactersRemaining}
+                  {`10 character maximum per choice ${onChangeNotifications.choicesCharacterMax}`}
                 </div>
 
                 <div style={{ fontSize: 14, color: 'red', marginLeft: '2px' }}>
