@@ -19,31 +19,37 @@ const Builder = () => {
   })
   const [onChangeNotifications, setOnChangeNotifications] = useState({
     defaultCharacterMax: `${MAX_CHARACTER_LIMIT} character maximum`,
-    choicesCharacterMax: ''
+    maxExceeded: false
   })
   const [notifications, setNotifications] = useState({
     duplicatesError: '',
-    choicesError: ''
+    choicesError: '',
+    lengthError: ''
   })
   const [created, setCreated] = useState('')
 
   // Turn choices string into an array
-  // Add defaultChoice value if not already included
-  const normalizeChoices = (choices, defaultChoice, displayAlpha) => {
+  const normalizeChoices = (choices, displayAlpha) => {
     let choicesArray = choices.split('\n')
 
-    const choicesArrayLowerCase = choicesArray.map(choice => choice.toLowerCase())
-
-    if (!choicesArrayLowerCase.includes(defaultChoice.toLowerCase())) {
-      choicesArray.unshift(defaultChoice.trim())
-    }
+    choicesArray = choicesArray.map(x => x.trim())
+    choicesArray = choicesArray.filter(element => element !== '')
 
     if (displayAlpha) {
       choicesArray.sort()
     }
+    return choicesArray
+  }
 
-    choicesArray = choicesArray.map(x => x.trim())
-    choicesArray = choicesArray.filter(element => element !== '')
+  // Add defaultChoice value if not already included
+  const addDefaultIfNeeded = (defaultChoice, choicesArray) => {
+    const defaultLowerCase = defaultChoice.toLowerCase().trim()
+
+    const choicesArrayLowerCase = choicesArray.map(choice => choice.toLowerCase())
+
+    if (!defaultLowerCase === '' && !choicesArrayLowerCase.includes(defaultLowerCase)) {
+      choicesArray.unshift(defaultChoice.trim())
+    }
     return choicesArray
   }
 
@@ -91,9 +97,11 @@ const Builder = () => {
   const handleSubmit = event => {
     event.preventDefault()
 
-    const choicesArray = normalizeChoices(field.choices, field.default, field.displayAlpha)
+    let choicesArray = normalizeChoices(field.choices, field.displayAlpha)
+    choicesArray = addDefaultIfNeeded(field.default, choicesArray)
+    const errors = validate(choicesArray, MAX_CHARACTER_LIMIT)
+
     const choicesString = choicesArray.join('\n')
-    const errors = validate(choicesArray)
 
     setField({ ...field, choices: choicesString })
     setNotifications({ ...errors })
@@ -103,11 +111,11 @@ const Builder = () => {
     }
   }
 
-  const submit = () => {
+  const submit = (choicesArray) => {
     const data = {
       label: field.label,
       default: field.default,
-      choices: normalizeChoices(field.choices, field.default, field.displayAlpha),
+      choices: choicesArray,
       displayAlpha: field.displayAlpha,
       multiSelect: field.multiSelect,
       required: field.required
@@ -136,13 +144,13 @@ const Builder = () => {
     })
 
     setOnChangeNotifications({
-      defaultCharacterMax: `${MAX_CHARACTER_LIMIT} character maximum`,
-      choicesCharacterMax: ''
+      defaultCharacterMax: `${MAX_CHARACTER_LIMIT} character maximum`
     })
 
     setNotifications({
       duplicatesError: '',
-      choicesError: ''
+      choicesError: '',
+      lengthError: ''
     })
 
     setCreated('')
@@ -188,7 +196,6 @@ const Builder = () => {
                   type="text"
                   name="default"
                   placeholder="Red Velvet"
-                  // maxLength= {MAX_CHARACTER_LIMIT}
                   onChange={handleChange}
                   value={field.default}
                   md={7} />
@@ -224,6 +231,9 @@ const Builder = () => {
 
                 <div style={{ fontSize: 14, color: 'red' }}>
                   {notifications.choicesError}
+                </div>
+                <div style={{ fontSize: 14, color: 'red' }}>
+                  {notifications.lengthError}
                 </div>
               </Col>
             </Form.Group>
