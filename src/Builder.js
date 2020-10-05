@@ -9,6 +9,7 @@ import { validate } from './validations.js'
 
 const Builder = () => {
   const MAX_CHARACTER_LIMIT = 10
+
   const [field, setField] = useState({
     label: '',
     default: '',
@@ -17,9 +18,8 @@ const Builder = () => {
     multiSelect: false,
     required: false
   })
-  const [onChangeNotifications, setOnChangeNotifications] = useState({
-    defaultCharacterMax: `${MAX_CHARACTER_LIMIT} character maximum`,
-    maxExceeded: false
+  const [defaultChoiceNotification, setDefaultChoiceNotification] = useState({
+    defaultCharacterMax: `${MAX_CHARACTER_LIMIT} character maximum`
   })
   const [notifications, setNotifications] = useState({
     duplicatesError: '',
@@ -43,14 +43,42 @@ const Builder = () => {
 
   // Add defaultChoice value if not already included
   const addDefaultIfNeeded = (defaultChoice, choicesArray) => {
-    const defaultLowerCase = defaultChoice.toLowerCase().trim()
+    // Do not add default value if none exists
+    if (!defaultChoice) {
+      return choicesArray
+    }
 
+    const defaultLowerCase = defaultChoice.toLowerCase().trim()
     const choicesArrayLowerCase = choicesArray.map(choice => choice.toLowerCase())
 
-    if (!defaultLowerCase === '' && !choicesArrayLowerCase.includes(defaultLowerCase)) {
+    if (!choicesArrayLowerCase.includes(defaultLowerCase)) {
       choicesArray.unshift(defaultChoice.trim())
     }
+    characterNotification(defaultLowerCase, MAX_CHARACTER_LIMIT)
     return choicesArray
+  }
+
+  const characterNotification = (defaultChoice, maxCharacterLength) => {
+    const choiceLength = defaultChoice.length
+    const characterDifference = maxCharacterLength - choiceLength
+
+    let notification
+    if (!choiceLength) {
+      notification = `${MAX_CHARACTER_LIMIT} character maximum`
+    } else if (characterDifference >= 0) {
+      if (characterDifference === 1) {
+        notification = `${characterDifference} character left`
+      } else {
+        notification = `${characterDifference} characters left`
+      }
+    } else if (characterDifference < 0) {
+      if (Math.abs(characterDifference) === 1) {
+        notification = `${Math.abs(characterDifference)} character past maximum`
+      } else {
+        notification = `${Math.abs(characterDifference)} characters past maximum`
+      }
+    }
+    setDefaultChoiceNotification({ defaultCharacterMax: notification })
   }
 
   // Updates field state to reflect changes in text areas
@@ -58,34 +86,14 @@ const Builder = () => {
     event.persist()
     setField(field => ({ ...field, [event.target.name]: event.target.value }))
 
-    // Characters remaining
-    const choiceLength = event.target.value.length
+    // Characters remaining/countdown for Default Choice ONLY
     const isDefault = event.target.name === 'default'
-    const charactersRemaining = MAX_CHARACTER_LIMIT - choiceLength
+    const defaultChoice = event.target.value
 
     if (!isDefault) {
-      return
+    } else {
+      characterNotification(defaultChoice, MAX_CHARACTER_LIMIT)
     }
-
-    // Default Choice Length Validation
-    let notification
-    if (!choiceLength) {
-      notification = `${MAX_CHARACTER_LIMIT} character maximum`
-    } else if (charactersRemaining >= 0) {
-      if (charactersRemaining === 1) {
-        notification = `${charactersRemaining} character left`
-      } else {
-        notification = `${charactersRemaining} characters left`
-      }
-    } else if (charactersRemaining < 0) {
-      // add code to change color of the notification
-      if (Math.abs(charactersRemaining) === 1) {
-        notification = `${Math.abs(charactersRemaining)} character past maximum`
-      } else {
-        notification = `${Math.abs(charactersRemaining)} characters past maximum`
-      }
-    }
-    onChangeNotifications.defaultCharacterMax = notification
   }
 
   // Check box handling
@@ -96,18 +104,17 @@ const Builder = () => {
 
   const handleSubmit = event => {
     event.preventDefault()
-
     let choicesArray = normalizeChoices(field.choices, field.displayAlpha)
     choicesArray = addDefaultIfNeeded(field.default, choicesArray)
     const errors = validate(choicesArray, MAX_CHARACTER_LIMIT)
 
     const choicesString = choicesArray.join('\n')
 
-    setField({ ...field, choices: choicesString })
+    setField({ ...field, default: field.default.trim(), choices: choicesString })
     setNotifications({ ...errors })
     setCreated('')
     if (Object.values(errors).every(x => x === '')) {
-      submit()
+      submit(choicesArray)
     }
   }
 
@@ -143,7 +150,7 @@ const Builder = () => {
       required: false
     })
 
-    setOnChangeNotifications({
+    setDefaultChoiceNotification({
       defaultCharacterMax: `${MAX_CHARACTER_LIMIT} character maximum`
     })
 
@@ -201,7 +208,7 @@ const Builder = () => {
                   md={7} />
 
                 <div style={{ fontSize: 14, color: 'black' }}>
-                  {onChangeNotifications.defaultCharacterMax}
+                  {defaultChoiceNotification.defaultCharacterMax}
                 </div>
               </Col>
             </Form.Group>
@@ -222,7 +229,7 @@ const Builder = () => {
                   md={7} />
 
                 <div style={{ fontSize: 14, color: 'black' }}>
-                  {`10 character maximum per choice ${onChangeNotifications.choicesCharacterMax}`}
+                  10 character maximum per choice
                 </div>
 
                 <div style={{ fontSize: 14, color: 'red', marginLeft: '2px' }}>
