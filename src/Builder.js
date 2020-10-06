@@ -8,7 +8,7 @@ import axios from 'axios'
 import { validate } from './validations.js'
 
 const Builder = () => {
-  const MAX_CHARACTER_LIMIT = 10
+  const MAX_CHARACTER_LIMIT = 40
 
   const [field, setField] = useState({
     label: '',
@@ -29,15 +29,12 @@ const Builder = () => {
   const [created, setCreated] = useState('')
 
   // Turn choices string into an array
-  const normalizeChoices = (choices, displayAlpha) => {
+  const normalizeChoices = (choices) => {
     let choicesArray = choices.split('\n')
 
     choicesArray = choicesArray.map(x => x.trim())
     choicesArray = choicesArray.filter(element => element !== '')
 
-    if (displayAlpha) {
-      choicesArray.sort()
-    }
     return choicesArray
   }
 
@@ -49,7 +46,7 @@ const Builder = () => {
 
     const defaultLowerCase = defaultChoice.toLowerCase().trim()
 
-    choiceCharacterNotification(defaultLowerCase, MAX_CHARACTER_LIMIT)
+    notifyDefaultChoiceLength(defaultLowerCase, MAX_CHARACTER_LIMIT)
 
     const choicesArrayLowerCase = choicesArray.map(choice => choice.toLowerCase())
 
@@ -60,7 +57,7 @@ const Builder = () => {
   }
 
   // Determine Default Choice length
-  const choiceCharacterNotification = (defaultChoice, maxCharacterLength) => {
+  const notifyDefaultChoiceLength = (defaultChoice, maxCharacterLength) => {
     const choiceLength = defaultChoice.length
     const characterDifference = maxCharacterLength - choiceLength
 
@@ -94,7 +91,7 @@ const Builder = () => {
 
     if (!isDefault) {
     } else {
-      choiceCharacterNotification(defaultChoice, MAX_CHARACTER_LIMIT)
+      notifyDefaultChoiceLength(defaultChoice, MAX_CHARACTER_LIMIT)
     }
   }
 
@@ -104,10 +101,36 @@ const Builder = () => {
     setField(field => ({ ...field, [event.target.name]: !field[event.target.name] }))
   }
 
+  // If Default Choice exceeds character limit
+  // remove it from choicesArray
+  // This is called after validations to prevent
   const removeInvalidDefaultChoice = (defaultChoice, choicesArray) => {
     if (defaultChoice.length > MAX_CHARACTER_LIMIT) {
       choicesArray = choicesArray.filter(element => (element !== defaultChoice))
     }
+    return choicesArray
+  }
+
+  // Alphabetize Choices
+  const alphabetize = (choicesArray, displayAlpha) => {
+    if (displayAlpha) {
+      choicesArray = choicesArray.sort()
+      return choicesArray
+    }
+    return choicesArray
+  }
+
+  // Move Default Choice to first choice unless Choices are alphabetized
+  const prioritizeDefaultChoice = (defaultChoice, choicesArray, displayAlpha) => {
+    if (displayAlpha) {
+      return choicesArray
+    }
+
+    if (choicesArray.indexOf(defaultChoice) <= 0) {
+      return choicesArray
+    }
+    choicesArray = choicesArray.filter(element => (element !== defaultChoice))
+    choicesArray = [defaultChoice, ...choicesArray]
     return choicesArray
   }
 
@@ -116,9 +139,9 @@ const Builder = () => {
     let choicesArray = normalizeChoices(field.choices, field.displayAlpha)
     choicesArray = addDefaultIfNeeded(field.default, choicesArray)
     const errors = validate(choicesArray, MAX_CHARACTER_LIMIT)
-    // If Default Choice exceeds character limit
-    // remove from choicesArray
     choicesArray = removeInvalidDefaultChoice(field.default, choicesArray, MAX_CHARACTER_LIMIT)
+    choicesArray = alphabetize(choicesArray, field.displayAlpha)
+    choicesArray = prioritizeDefaultChoice(field.default, choicesArray, field.displayAlpha)
     const choicesString = choicesArray.join('\n')
 
     setField({ ...field, default: field.default.trim(), choices: choicesString })
