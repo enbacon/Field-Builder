@@ -59,6 +59,7 @@ const Builder = () => {
     return choicesArray
   }
 
+  // Determine Default Choice length
   const choiceCharacterNotification = (defaultChoice, maxCharacterLength) => {
     const choiceLength = defaultChoice.length
     const characterDifference = maxCharacterLength - choiceLength
@@ -103,12 +104,21 @@ const Builder = () => {
     setField(field => ({ ...field, [event.target.name]: !field[event.target.name] }))
   }
 
+  const removeInvalidDefaultChoice = (defaultChoice, choicesArray) => {
+    if (defaultChoice.length > MAX_CHARACTER_LIMIT) {
+      choicesArray = choicesArray.filter(element => (element !== defaultChoice))
+    }
+    return choicesArray
+  }
+
   const handleSubmit = event => {
     event.preventDefault()
     let choicesArray = normalizeChoices(field.choices, field.displayAlpha)
     choicesArray = addDefaultIfNeeded(field.default, choicesArray)
     const errors = validate(choicesArray, MAX_CHARACTER_LIMIT)
-
+    // If Default Choice exceeds character limit
+    // remove from choicesArray
+    choicesArray = removeInvalidDefaultChoice(field.default, choicesArray, MAX_CHARACTER_LIMIT)
     const choicesString = choicesArray.join('\n')
 
     setField({ ...field, default: field.default.trim(), choices: choicesString })
